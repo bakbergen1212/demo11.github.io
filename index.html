@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>🌱 ЭкоФерм | Затраты KZT</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#4CAF50">
+  <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoi8J+cIOKCsCIsInNob3J0X25hbWUiOiLigqE8L3RleHQ+PC9zdmc+">
+  <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48dGV4dCB5PSIuOWVtIiBmb250LXNpemU9IjkwIj7igqE8L3RleHQ+PC9zdmc+">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--green:#4CAF50;--green-dark:#2E7D32;--blue:#2196F3;--gray:#666;--shadow:0 8px 32px rgba(0,0,0,.12);}
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    body{font-family:'Inter',system-ui,sans-serif;background:linear-gradient(135deg,#E8F5E8,#C8E6C9);min-height:100vh;color:#1a1a1a;overflow-x:hidden;touch-action:manipulation;padding-bottom:env(safe-area-inset-bottom);}
+    .hero{background:linear-gradient(135deg,var(--green),var(--green-dark));color:white;text-align:center;padding:clamp(40px,15vh,80px) 20px 40px;}
+    .hero h1{font-size:clamp(1.8rem,8vw,3rem);font-weight:800;margin-bottom:12px;text-shadow:0 4px 12px rgba(0,0,0,.3);}
+    .hero .subtitle{font-size:clamp(1rem,4vw,1.2rem);opacity:.95;max-width:90vw;margin:0 auto;line-height:1.4;}
+    .container{max-width:100%;margin:0 auto;padding:20px 20px 100px;}
+    .card{background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-radius:24px;padding:clamp(24px,6vw,32px);box-shadow:var(--shadow);margin-bottom:24px;border:1px solid rgba(255,255,255,.8);}
+    .input-group{margin-bottom:20px;}
+    label{display:block;margin-bottom:8px;font-weight:600;color:var(--green-dark);font-size:clamp(.85rem,3.5vw,.95rem);}
+    input,select{width:100%;padding:clamp(14px,5vw,18px) 20px;border:2px solid #E8F0FE;border-radius:16px;font-size:clamp(16px,5vw,18px);font-weight:500;background:rgba(255,255,255,.8);transition:all .2s ease;}
+    input:focus,select:focus{border-color:var(--green);box-shadow:0 0 0 4px rgba(76,175,80,.15);background:white;outline:none;}
+    select{background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");background-repeat:no-repeat;background-position:right 16px center;background-size:20px;padding-right:50px;}
+    .btn{padding:clamp(16px,6vw,20px) 24px;border:none;border-radius:16px;font-size:clamp(16px,4.5vw,18px);font-weight:600;cursor:pointer;transition:all .2s ease;width:100%;margin:8px 0;min-height:56px;position:relative;}
+    .btn-primary{background:linear-gradient(135deg,var(--green),var(--green-dark));color:white;box-shadow:0 4px 16px rgba(76,175,80,.3);}
+    .btn-primary:active{transform:scale(.98);box-shadow:0 2px 8px rgba(76,175,80,.3);}
+    .btn-secondary{background:linear-gradient(135deg,var(--blue),#1976D2);color:white;}
+    .btn:disabled{opacity:.5;cursor:not-allowed;}
+    .action-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.95);backdrop-filter:blur(20px);padding:16px;border-top:1px solid #E0E7FF;display:none;z-index:1000;box-shadow:0 -4px 20px rgba(0,0,0,.1);}
+    .action-bar.show{display:flex;gap:12px;flex-wrap:wrap;}
+    #result{display:none;background:linear-gradient(135deg,rgba(241,248,233,.95),rgba(232,245,232,.95));border-radius:24px;padding:clamp(24px,8vw,40px);margin:24px -20px;border:1px solid rgba(76,175,80,.2);animation:fadeIn .4s ease-out;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+    .metric-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px;margin:24px 0;}
+    .metric{background:rgba(255,255,255,.9);padding:20px 12px;border-radius:20px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.08);transition:transform .15s ease;}
+    .metric:active{transform:scale(.98);}
+    .metric-value{font-size:clamp(1.5rem,8vw,2.2rem);font-weight:800;color:var(--green-dark);margin-bottom:8px;line-height:1.2;}
+    .metric label{font-size:clamp(.75rem,3vw,.9rem);color:var(--gray);font-weight:500;display:block;line-height:1.3;}
+    .metric small{display:block;font-size:.8em;opacity:.8;}
+    .eco-tip{font-size:clamp(1.1rem,5vw,1.4rem);font-weight:700;text-align:center;margin:20px 0;padding:16px;background:rgba(76,175,80,.1);border-radius:16px;border-left:5px solid var(--green);}
+    #chart{max-height:clamp(280px,45vw,380px);border-radius:20px;margin:24px 0;}
+    .debug{padding:16px;border-radius:16px;margin:16px 0;font-weight:600;font-size:clamp(.9rem,4vw,1rem);border-radius:12px;display:none;text-align:center;}
+    .footer{text-align:center;padding:24px 20px;color:var(--gray);font-size:.9rem;opacity:.8;}
+    .loading{pointer-events:none;opacity:.8;}
+    .loading .btn::after{content:'';position:absolute;right:20px;top:50%;margin-top:-10px;width:20px;height:20px;border:2px solid transparent;border-top:2px solid white;border-radius:50%;animation:spin 1s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    @media (max-height:500px) and (orientation:landscape){.container{padding:12px;}.card{padding:20px;}}
+  </style>
+</head>
+<body>
+  <section class="hero">
+    <h1>🌱 ЭкоФерм</h1>
+    <p class="subtitle">Затраты KZT • Кызылорда<br><strong>Семена • Удобрения • Вода</strong></p>
+  </section>
+
+  <div class="container">
+    <div class="card">
+      <div class="input-group">
+        <label>📏 Площадь (га)</label>
+        <input id="area" type="number" value="1" min="0.1" max="1000" step="0.1" inputmode="decimal">
+      </div>
+      <div class="input-group">
+        <label>🌾 Культура</label>
+        <select id="crop">
+          <option value="рис">Рис</option>
+          <option value="пшеница">Пшеница</option>
+          <option value="томаты">Томаты</option>
+          <option value="кукуруза">Кукуруза</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label>🌱 Почва</label>
+        <select id="soil">
+          <option value="низкое">Низкое (+20%)</option>
+          <option value="среднее" selected>Среднее</option>
+          <option value="высокое">Высокое (-20%)</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label>🌧️ Дождь (мм/мес)</label>
+        <input id="rain" type="number" value="50" min="0" max="1000" inputmode="numeric">
+      </div>
+      <button class="btn btn-secondary" onclick="loadWeather()">☁️ Погода Кызылорды</button>
+      <button class="btn btn-primary" onclick="calculate()">🚀 Рассчитать ₸</button>
+    </div>
+
+    <div id="result">
+      <h2 id="res-title"></h2>
+      <div id="metrics" class="metric-row"></div>
+      <div id="res-text" class="eco-tip"></div>
+      <canvas id="chart"></canvas>
+    </div>
+    <div id="debug" class="debug"></div>
+  </div>
+
+  <div class="action-bar" id="actionBar">
+    <button class="btn btn-primary" onclick="exportCSV()" id="csvBtn" disabled>📥 CSV</button>
+    <button class="btn btn-secondary" onclick="exportPDF()" id="pdfBtn" disabled>📄 PDF</button>
+  </div>
+
+  <footer class="footer">Хакатон Кызылорда 2026 • Димаш Абдулла</footer>
+
+  <script>
+    const API_KEY = 'a9250a2e550f2e389ac64a01930fdf31'; // ✅ Рабочий ключ
+    let chartInstance = null;
+    let lastCalcData = null;
+
+    function debug(msg, success=false) {
+      const el = document.getElementById('debug');
+      el.textContent = msg;
+      el.style.background = success ? 'rgba(76,175,80,0.1)' : 'rgba(244,67,54,0.1)';
+      el.style.borderLeftColor = success ? '#4CAF50' : '#F44336';
+      el.style.color = success ? '#2E7D32' : '#D32F2F';
+      el.style.display = 'block';
+      setTimeout(() => el.style.display = 'none', 3000);
+    }
+
+    function setLoading(state) {
+      document.body.classList.toggle('loading', state);
+    }
+
+    async function loadWeather() {
+      setLoading(true);
+      try {
+        // ✅ Точные координаты Кызылорды [web:18]
+        const res = await fetch('https://api.openweathermap.org/data/2.5/weather?lat=44.85&lon=65.50&appid='+API_KEY+'&units=metric');
+        if (!res.ok) throw new Error('API ошибка: ' + res.status);
+        
+        const data = await res.json();
+        let rain = 50; // Дефолт
+        if (data.rain && data.rain['1h']) {
+          rain = Math.round(data.rain['1h'] * 720); // мм/мес
+        }
+        document.getElementById('rain').value = rain;
+        debug(`✅ Погода: ${rain} мм/мес, ${data.weather[0].description}`, true);
+        calculate();
+      } catch(e) {
+        document.getElementById('rain').value = 150;
+        debug('🌤️ Симуляция: 150 мм/мес (Кызылорда)');
+        calculate();
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    function calculate() {
+      try {
+        const area = parseFloat(document.getElementById('area').value) || 1;
+        const crop = document.getElementById('crop').value;
+        const soil = document.getElementById('soil').value;
+        const rain = parseFloat(document.getElementById('rain').value) || 50;
+
+        if (area < 0.1 || area > 1000) throw new Error('Площадь 0.1-1000 га');
+
+        // ✅ Цены KZT 2026 [web:19][web:22][web:25]
+        const prices = {
+          seeds: {рис:160, пшеница:150, томаты:250, кукуруза:180},
+          fert: {рис:200, пшеница:180, томаты:220, кукуруза:190},
+          water: 0.15
+        };
+
+        const crops = {
+          рис: {seeds:400, fert:150, water:8000, co2:1.2, color:'#FF5722', name:'Рис'},
+          пшеница: {seeds:200, fert:120, water:4000, co2:0.9, color:'#795548', name:'Пшеница'},
+          томаты: {seeds:20000, fert:200, water:5000, co2:0.8, color:'#E91E63', name:'Томаты'},
+          кукуруза: {seeds:250, fert:180, water:6000, co2:1.1, color:'#4CAF50', name:'Кукуруза'}
+        };
+
+        const item = crops[crop];
+        const soilMult = {низкое:1.2, среднее:1, высокое:0.8}[soil];
+        
+        const seedsKg = Math.round(item.seeds * area * soilMult);
+        const fertKg = Math.round(item.fert * area * soilMult);
+        const baseWaterL = item.water * area * 10000; // л/га
+        const savedWaterL = rain * area * 1000;
+        const waterL = Math.max(0, baseWaterL - savedWaterL);
+        
+        const seedsCost = Math.round(seedsKg * prices.seeds[crop]);
+        const fertCost = Math.round(fertKg * prices.fert[crop]);
+        const waterCost = Math.round(waterL * prices.water);
+        const totalCost = seedsCost + fertCost + waterCost;
+
+        lastCalcData = {
+          area, crop: item.name, seedsKg, fertKg, waterL, savedWaterL,
+          seedsCost, fertCost, waterCost, totalCost, item
+        };
+
+        // ✅ Обновление UI
+        document.getElementById('res-title').textContent = `${area} га ${item.name}: ${totalCost.toLocaleString()} ₸`;
+        
+        document.getElementById('metrics').innerHTML = `
+          <div class="metric">
+            <div class="metric-value">${seedsKg.toLocaleString()}</div>
+            <label>🌾 Семена<br><small>${seedsCost.toLocaleString()} ₸</small></label>
+          </div>
+          <div class="metric">
+            <div class="metric-value">${fertKg.toLocaleString()}</div>
+            <label>🧪 Удобрения<br><small>${fertCost.toLocaleString()} ₸</small></label>
+          </div>
+          <div class="metric">
+            <div class="metric-value">${Math.round(waterL/1000).toLocaleString()}</div>
+            <label>💧 Вода (м³)<br><small>${waterCost.toLocaleString()} ₸</small></label>
+          </div>
+          <div class="metric">
+            <div class="metric-value">${totalCost.toLocaleString()}</div>
+            <label>💰 ИТОГО<br><small>${Math.round(totalCost/area).toLocaleString()} ₸/га</small></label>
+          </div>
+        `;
+
+        document.getElementById('res-text').innerHTML = `
+          💧 Экономия воды: <strong>${savedWaterL.toLocaleString()} л</strong><br>
+          <strong>${totalCost < 500000 ? '✅ ЭКОНОМНО' : '⚠️ ОПТИМИЗИРУЙТЕ'}</strong>
+        `;
+
+        document.getElementById('result').style.display = 'block';
+        document.getElementById('csvBtn').disabled = false;
+        document.getElementById('pdfBtn').disabled = false;
+        document.getElementById('actionBar').classList.add('show');
+        
+        updateChart(seedsKg, fertKg, waterL/1000, totalCost/100000, item.color);
+        debug(`✅ ${totalCost.toLocaleString()} ₸ за ${area} га [web:19][web:22]`, true);
+
+      } catch(e) {
+        debug('❌ ' + e.message);
+      }
+    }
+
+    function updateChart(seeds, fert, water, total, color) {
+      const ctx = document.getElementById('chart').getContext('2d');
+      if (chartInstance) chartInstance.destroy();
+      
+      chartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Семена', 'Удобрения', 'Вода (м³)', 'Итого (тыс.₸)'],
+          datasets: [{
+            data: [seeds/100, fert/100, water/10, total],
+            backgroundColor: [color, '#FF9800', '#2196F3', '#4CAF50'],
+            borderWidth: 3,
+            borderColor: '#fff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: '📊 Затраты ресурсов + KZT',
+              font: { size: 16, weight: 'bold' }
+            }
+          }
+        }
+      });
+    }
+
+    function exportCSV() {
+      if (!lastCalcData) return;
+      const d = lastCalcData;
+      const csv = `Площадь(га),Культура,Семена(кг),₸,Удобрения(кг),₸,Вода(м³),₸,Итого(₸),Экономия(л)\n` +
+                  `${d.area},${d.crop},${d.seedsKg},${d.seedsCost},${d.fertKg},${d.fertCost},${Math.round(d.waterL/1000)},${d.waterCost},${d.totalCost},${d.savedWaterL}`;
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `ecofarm_${d.crop}_${d.area}га_${d.totalCost}₸.csv`;
+      a.click();
+      debug('📥 CSV скачан!', true);
+    }
+
+    function exportPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const d = lastCalcData;
+      
+      doc.setFontSize(20);
+      doc.text('🌱 ЭКОФЕРМ ОТЧЁТ', 105, 25, { align: 'center' });
+      doc.setFontSize(14);
+      doc.text(`${d.crop} | ${d.area} га`, 20, 50);
+      doc.text(`ИТОГО: ${d.totalCost.toLocaleString()} ₸`, 20, 65);
+      doc.text(`Семена: ${d.seedsKg} кг = ${d.seedsCost.toLocaleString()} ₸`, 20, 80);
+      doc.text(`Удобрения: ${d.fertKg} кг = ${d.fertCost.toLocaleString()} ₸`, 20, 95);
+      doc.text(`Вода: ${Math.round(d.waterL/1000)} м³ = ${d.waterCost.toLocaleString()} ₸`, 20, 110);
+      doc.text('Хакатон Кызылорда 2026', 105, 280, { align: 'center' });
+      
+      doc.save(`ecofarm_${d.crop}_${d.area}га.pdf`);
+      debug('📄 PDF скачан!', true);
+    }
+
+    // Инициализация
+    window.onload = () => {
+      debug('🚀 Калькулятор готов! Нажмите "Рассчитать"', true);
+      
+      // Enter = calculate
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !document.querySelector('input:focus')) {
+          calculate();
+        }
+      });
+    };
+
+    // Сброс кнопок при изменении
+    document.querySelectorAll('input, select').forEach(el => {
+      el.addEventListener('input', () => {
+        document.getElementById('csvBtn').disabled = true;
+        document.getElementById('pdfBtn').disabled = true;
+        document.getElementById('actionBar').classList.remove('show');
+        if (chartInstance) {
+          chartInstance.destroy();
+          chartInstance = null;
+        }
+      });
+    });
+  </script>
+</body>
+</html>
